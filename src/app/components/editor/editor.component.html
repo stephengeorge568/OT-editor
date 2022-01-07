@@ -1,0 +1,5 @@
+<div style="width: 75%; height: 100%;">
+    <ngx-monaco-editor [options]="editorOptions" [model]="x" (onInit)="onInit($event)" (onDidChangeModelContent)="codeChange($event)"></ngx-monaco-editor>
+</div>
+
+<button (click)="yell()">Press</button>

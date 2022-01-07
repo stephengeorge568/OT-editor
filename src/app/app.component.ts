@@ -7,7 +7,6 @@ import { NgxEditorModel } from 'ngx-monaco-editor';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  editorOptions = { language: "xml", fontSize: 20 };
-  code: string = "";
+  
   
 }
