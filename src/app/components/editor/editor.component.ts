@@ -13,6 +13,7 @@ export class EditorComponent implements OnInit {
   code: string= 'function x() {\nconsole.log("Hello world!");\n}';
   x: NgxEditorModel = {value : 'function x()'};
   editor: any;
+  subsc: any;
   constructor() { }
 
   ngOnInit(): void {
@@ -29,10 +30,12 @@ export class EditorComponent implements OnInit {
 
   onInit(editorInit: monaco.editor.IStandaloneCodeEditor) {
     this.editor = editorInit;
-    console.log(editorInit.constructor.name)
-    //console.log(1);
+    
     let line = editorInit.getPosition();
-    console.log(line);
+    this.subsc = this.editor.getModel().onDidChangeContent(() => {
+        // store prev value in cache, compare new one to it, and create change from there. while keeping in mind index, etc
+        console.log(this.editor.getModel().getValue());
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
