@@ -11,10 +11,16 @@ export class EditorComponent implements OnInit {
 
   editorOptions = {theme: 'vs-dark', language: 'javascript'};
   code: string= 'function x() {\nconsole.log("Hello world!");\n}';
-  x: NgxEditorModel = {value : 'function x()'};
+  model: NgxEditorModel = {value : ''};
+
   editor: any;
   subsc: any;
-  constructor() { }
+
+  previousModelValue: string = this.model.value;
+
+  constructor() { 
+
+  }
 
   ngOnInit(): void {
     
@@ -33,8 +39,13 @@ export class EditorComponent implements OnInit {
     
     let line = editorInit.getPosition();
     this.subsc = this.editor.getModel().onDidChangeContent(() => {
-        // store prev value in cache, compare new one to it, and create change from there. while keeping in mind index, etc
-        console.log(this.editor.getModel().getValue());
+        // if positive, insertion. if 1, character insertion.
+        
+        
+
+        
+        
+        this.previousModelValue = this.editor.getModel().getValue();
     });
   }
 
