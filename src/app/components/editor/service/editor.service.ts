@@ -7,7 +7,7 @@ export class EditorService {
 
   constructor() { }
 
-  public findStringDifference(previousValue: string, currentValue: string): [stringDiff: string, index: number] {
+  public findStringDifference(previousValue: string, currentValue: string): [stringDiff: string, index: number, isInsert: boolean] {
     let lengthDifference: number = currentValue.length - previousValue.length;
         // Compare previous model value to the new model value. Keep in mind starting index of change.
         if (lengthDifference < 0) {
@@ -29,6 +29,6 @@ export class EditorService {
 
           }
         }
-    return ["a", 1];
+    return ["a", 1, true];
   }
 }
