@@ -1,6 +1,7 @@
 import { Component, OnInit, SimpleChange, SimpleChanges } from '@angular/core';
 import * as monaco from 'monaco-editor';
 import { NgxEditorModel } from 'ngx-monaco-editor';
+import { EditorService } from './service/editor.service';
 
 @Component({
   selector: 'app-editor',
@@ -9,17 +10,16 @@ import { NgxEditorModel } from 'ngx-monaco-editor';
 })
 export class EditorComponent implements OnInit {
 
+  editorService: EditorService;
+
   editorOptions = {theme: 'vs-dark', language: 'javascript'};
   code: string= 'function x() {\nconsole.log("Hello world!");\n}';
   model: NgxEditorModel = {value : ''};
 
   editor: any;
   subsc: any;
-
-  previousModelValue: string = this.model.value;
-
-  constructor() { 
-
+  constructor(editorService: EditorService) { 
+    this.editorService = editorService;
   }
 
   ngOnInit(): void {
@@ -36,16 +36,9 @@ export class EditorComponent implements OnInit {
 
   onInit(editorInit: monaco.editor.IStandaloneCodeEditor) {
     this.editor = editorInit;
-    
-    let line = editorInit.getPosition();
-    this.subsc = this.editor.getModel().onDidChangeContent(() => {
-        // if positive, insertion. if 1, character insertion.
-        
-        
-
-        
-        
-        this.previousModelValue = this.editor.getModel().getValue();
+    this.subsc = this.editor.getModel().onDidChangeContent((event: monaco.editor.IModelContentChangedEvent) => {
+        console.log(event);
+        this.editorService.collectChange(event, new Date().toISOString());
     });
   }
 
