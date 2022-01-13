@@ -1,7 +1,9 @@
 import { Component, OnInit, SimpleChange, SimpleChanges } from '@angular/core';
 import * as monaco from 'monaco-editor';
 import { NgxEditorModel } from 'ngx-monaco-editor';
+import { WebSocketAPI } from 'src/app/objects/WebSocket';
 import { EditorService } from './service/editor.service';
+import { WebSocketService } from './service/web-socket.service';
 
 @Component({
   selector: 'app-editor',
@@ -11,6 +13,8 @@ import { EditorService } from './service/editor.service';
 export class EditorComponent implements OnInit {
 
   editorService: EditorService;
+  webSocketService: WebSocketService;
+  webSocket: WebSocketAPI;
 
   editorOptions = {theme: 'vs-dark', language: 'javascript'};
   code: string= 'function x() {\nconsole.log("Hello world!");\n}';
@@ -18,16 +22,15 @@ export class EditorComponent implements OnInit {
 
   editor: any;
   subsc: any;
-  constructor(editorService: EditorService) { 
+  constructor(editorService: EditorService, webSocketService: WebSocketService) { 
     this.editorService = editorService;
+    this.webSocketService = webSocketService;
+    this.webSocket = new WebSocketAPI();
   }
 
   ngOnInit(): void {
-    
-  }
-
-  yell(): void {
-    console.log(this.editor.getModel()?.getValue());
+    this.connect();
+    //this.sendMessage();
   }
 
   codeChange(change: any) {
@@ -42,8 +45,29 @@ export class EditorComponent implements OnInit {
     });
   }
 
+  send(): void {
+    this.sendMessage();
+  }
+
   ngOnChanges(changes: SimpleChanges) {
     console.log(changes);
   }
+
+  connect(): void {
+    this.webSocket._connect();
+  }
+
+  disconnect(): void {
+    this.webSocket._disconnect();
+  }
+
+  sendMessage(): void {
+    this.webSocket._send({timestamp: "d", text: "dd", number: 1});
+  }
+
+  recieveMessage(message: any): void {
+    console.log(message)
+  }
+
 
 }

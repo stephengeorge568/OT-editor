@@ -1,11 +1,18 @@
 import { Injectable } from '@angular/core';
 import * as monaco from 'monaco-editor';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class EditorService {
+  
 
-  constructor() { }
+  
+  constructor() {
+
+   }
 
   public collectChange(event: monaco.editor.IModelContentChangedEvent, timestamp: string): void {
     
@@ -18,4 +25,13 @@ export class EditorService {
     }
     
   }
+
+  
+
+  public connectWebSocket(): void {
+   
+  }
+
+
+
 }
