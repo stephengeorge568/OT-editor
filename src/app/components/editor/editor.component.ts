@@ -1,4 +1,5 @@
 import { Component, OnInit, SimpleChange, SimpleChanges } from '@angular/core';
+import { InjectSetupWrapper } from '@angular/core/testing';
 import * as monaco from 'monaco-editor';
 import { NgxEditorModel } from 'ngx-monaco-editor';
 import { EditorService } from './service/editor.service';
@@ -14,7 +15,7 @@ export class EditorComponent implements OnInit {
 
   editorOptions = {theme: 'vs-dark', language: 'javascript'};
   code: string= 'function x() {\nconsole.log("Hello world!");\n}';
-  model: NgxEditorModel = {value : ''};
+  model: NgxEditorModel = {value : 'abcdefg'};
 
   editor: any;
   subsc: any;
@@ -26,11 +27,18 @@ export class EditorComponent implements OnInit {
     this.connect();
   }
 
-  codeChange(change: any) {
-    console.log(change);
+  button() {
+      setTimeout(() => {
+        let pos: monaco.Position = this.editor.getPosition();    
+        this.editor.setPosition(this.executeOperation('1\n', 3));
+    }, 4000);
+  
+   
+    
   }
 
   onInit(editorInit: monaco.editor.IStandaloneCodeEditor) {
+    
     this.editor = editorInit;
     this.subsc = this.editor.getModel().onDidChangeContent((event: monaco.editor.IModelContentChangedEvent) => {
         console.log(event);
@@ -38,8 +46,27 @@ export class EditorComponent implements OnInit {
     });
   }
 
-  pushOperation(): void {
-    
+  // substring (i inclusive, j exlusive)
+  executeOperation(text: string, index: number): monaco.Position {
+    //if (text.length > 0) {
+      // Insert
+
+      let numberOfColumnsToMoveCursor: number = text.replace(/\r?\n?/g, '').length;
+      let numOfLinesToMoveCursor: number = text.split('\n').length - 1;
+
+      let currentModelValue: string = this.editor.getModel().getValue();
+      let leftNode: string = currentModelValue.substring(0, index);
+      let rightNode: string = text + currentModelValue.substring(index, currentModelValue.length + 1);
+      console.log(numberOfColumnsToMoveCursor + ' , ' + numOfLinesToMoveCursor);
+      console.log(this.editor.getPosition().column + ' , ' + this.editor.getPosition().lineNumber);
+
+      let pos: monaco.Position = new monaco.Position(this.editor.getPosition().lineNumber + numOfLinesToMoveCursor, 
+                                                     this.editor.getPosition().column + numberOfColumnsToMoveCursor); 
+      this.editor.setValue(leftNode + rightNode);
+      // adjust cursor position to reflect new changes. to include '\n'
+
+      return pos;
+    //} 
   }
 
   ngOnDestroy(): void {
