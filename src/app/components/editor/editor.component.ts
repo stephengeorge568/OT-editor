@@ -21,6 +21,10 @@ export class EditorComponent implements OnInit {
   subsc: any;
   constructor(editorService: EditorService) { 
     this.editorService = editorService;
+
+    this.editorService.stringChangeRequestSubject.subscribe( operation => {
+      console.log(operation);
+    });
   }
 
   ngOnInit(): void {

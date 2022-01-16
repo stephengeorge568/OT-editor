@@ -4,6 +4,7 @@ import { MonacoEditorModule, NgxMonacoEditorConfig } from 'ngx-monaco-editor';
 import { AppComponent } from './app.component';
 import { FormsModule } from '@angular/forms';
 import { EditorComponent } from './components/editor/editor.component';
+import { HttpClientModule } from '@angular/common/http';
 
 const monacoConfig: NgxMonacoEditorConfig = {
   baseUrl: 'OT-editor/assets', // configure base path cotaining monaco-editor directory after build default: './assets'
@@ -17,6 +18,7 @@ const monacoConfig: NgxMonacoEditorConfig = {
     EditorComponent
   ],
   imports: [
+    HttpClientModule,
     BrowserModule,
     FormsModule,
     MonacoEditorModule.forRoot(monacoConfig)

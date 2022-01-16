@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
 import * as monaco from 'monaco-editor';
+import { BehaviorSubject } from 'rxjs';
 import * as SockJS from 'sockjs-client';
+import { StringChangeRequest } from 'src/app/objects/StringChangeRequest';
 import * as Stomp from 'stompjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root'
 })
@@ -10,8 +15,9 @@ export class EditorService {
   webSocketEndPoint: string = 'http://localhost:8080/ws';
   incomingURI: string = "/broker/string-change-request";
   stompClient: any;
+  stringChangeRequestSubject: BehaviorSubject<StringChangeRequest> = new BehaviorSubject(new StringChangeRequest("", "", -1));
   
-  constructor() {
+  constructor(private http: HttpClient) {
 
    }
 
@@ -27,8 +33,8 @@ export class EditorService {
     
   }
 
-  public sendOperation(): void {
-
+  public sendOperation(request: StringChangeRequest): void {
+    this.http.post("localhost:8080", request);
   }
   
 
@@ -58,8 +64,9 @@ errorFromWebSocket(error: any) {
   }, 5000);
 }
 
-recieveFromWebSocket(message: any) {
-  console.log("Message recieved: " + message);
+recieveFromWebSocket(request: any) {
+  this.stringChangeRequestSubject.next(new StringChangeRequest(request.timestamp, request.text, request.index))
+  //console.log("Message recieved: " + message);
 }
 
 
