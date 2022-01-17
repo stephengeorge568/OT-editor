@@ -2,6 +2,7 @@ import { Component, OnInit, SimpleChange, SimpleChanges } from '@angular/core';
 import { InjectSetupWrapper } from '@angular/core/testing';
 import * as monaco from 'monaco-editor';
 import { NgxEditorModel } from 'ngx-monaco-editor';
+import { StringChangeRequest } from 'src/app/objects/StringChangeRequest';
 import { EditorService } from './service/editor.service';
 
 @Component({
@@ -24,6 +25,7 @@ export class EditorComponent implements OnInit {
 
     this.editorService.stringChangeRequestSubject.subscribe( operation => {
       console.log(operation);
+      //this.executeOperation(operation.text, operation.startingIndex);
     });
   }
 
@@ -46,7 +48,7 @@ export class EditorComponent implements OnInit {
     this.editor = editorInit;
     this.subsc = this.editor.getModel().onDidChangeContent((event: monaco.editor.IModelContentChangedEvent) => {
         console.log(event);
-        this.editorService.collectChange(event, new Date().toISOString());
+        this.editorService.sendOperation(new StringChangeRequest(new Date().toISOString(), event.changes[0].text, event.changes[0].rangeOffset));
     });
   }
 

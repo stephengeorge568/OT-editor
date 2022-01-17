@@ -19,7 +19,7 @@ export class EditorService {
   
   constructor(private http: HttpClient) {
 
-   }
+  }
 
   public collectChange(event: monaco.editor.IModelContentChangedEvent, timestamp: string): void {
     
@@ -34,7 +34,14 @@ export class EditorService {
   }
 
   public sendOperation(request: StringChangeRequest): void {
-    this.http.post("localhost:8080", request);
+    //const options = {headers: {'Content-Type': 'application/json'}};
+    this.http.post("http://localhost:8080/change", request).subscribe(response => {
+      console.log(response);
+    },
+    err => {
+      console.log("error post!");
+      console.log(err);
+    });
   }
   
 
@@ -49,25 +56,25 @@ export class EditorService {
         }, this.errorFromWebSocket);
   }
 
-  disconnectWebSocket() {
+  public disconnectWebSocket() {
     if (this.stompClient !== null) {
         this.stompClient.disconnect();
     }
     console.log("Web socket connection has been terminated.");
-}
+  }
 
-errorFromWebSocket(error: any) {
-  console.log("APISocket error: " + error);
-  setTimeout(() => {
-      console.log("Attemping to reconnect to the server via web socket.");
-      this.connectWebSocket();
-  }, 5000);
-}
+  public errorFromWebSocket(error: any) {
+    console.log("APISocket error: " + error);
+    setTimeout(() => {
+        console.log("Attemping to reconnect to the server via web socket.");
+        this.connectWebSocket();
+    }, 5000);
+  }
 
-recieveFromWebSocket(request: any) {
-  this.stringChangeRequestSubject.next(new StringChangeRequest(request.timestamp, request.text, request.index))
-  //console.log("Message recieved: " + message);
-}
+  public recieveFromWebSocket(request: any) {
+    this.stringChangeRequestSubject.next(new StringChangeRequest(request.timestamp, request.text, request.index))
+    console.log("Message recieved: " + request);
+  }
 
 
 
