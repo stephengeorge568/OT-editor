@@ -16,8 +16,6 @@ import { MonacoRange } from 'src/app/objects/MonacoRange';
   providedIn: 'root'
 })
 export class EditorService {
-  
-  recievedEditsQueue: Queue;
 
   identity: string;
 
@@ -34,19 +32,14 @@ export class EditorService {
     this.identity = "";
     this.cacheIdentity();
     this.subjectObservable = this.stringChangeRequestSubject.asObservable();
-    this.recievedEditsQueue = new Queue();
   }
 
-  private enqueueStringChangeRequest(request: StringChangeRequest) {
-    this.recievedEditsQueue.enqueue(request);
-  }
 
   public recieveFromWebSocket(request: any) {
       
       let obj = JSON.parse(request.body);
       console.log(obj);
       if (obj.identity != this.identity) {
-        this.enqueueStringChangeRequest(new StringChangeRequest(obj.timestamp, obj.text, this.identity, obj.range));
         this.stringChangeRequestSubject.next(new StringChangeRequest(obj.timestamp, obj.text, this.identity, obj.range));
       }  
   }
@@ -62,7 +55,6 @@ export class EditorService {
 
   public sendOperation(request: StringChangeRequest): void {
     this.http.post("http://" + GlobalConstants.serverIP + ":8080/change", request).subscribe(response => {
-     
     },
     err => {
       console.log("Send operation has failed: " + err);
@@ -95,20 +87,4 @@ export class EditorService {
     }, 5000);
   }
 
-  // public getRangeFromIndex(index: number, model: string): monaco.IRange {
-  //   // o\no\no\n
-  //   let lines: string[] = model.split(/\r\n|\r|\n/);
-  //   let totalCharactersPassed: number = 0;
-  //   for (var line of lines) {
-  //     totalCharactersPassed += line.length;
-  //     if (totalCharactersPassed > index) {
-
-  //     }
-  //   }
-
-  //  // let numberOfColumnsToMoveCursor: number = text.replace(/\r?\n?/g, '').length;
-      
-  // }
-
-  
 }

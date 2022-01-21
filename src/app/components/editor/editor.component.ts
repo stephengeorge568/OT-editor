@@ -79,7 +79,7 @@ export class EditorComponent implements OnInit {
         this.editorService.sendOperation(new StringChangeRequest(new Date().toISOString(), event.changes[0].text, this.editorService.identity, 
                                          new MonacoRange(opRange.endColumn, opRange.startColumn, opRange.endLineNumber, opRange.startLineNumber)));
       } else {
-        console.log("Programattic change: " + event.changes[0].text);
+        console.log("Programmatic change: " + event.changes[0].text);
       } 
     }); 
   }
