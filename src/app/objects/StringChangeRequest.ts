@@ -1,14 +1,19 @@
+import { start } from "repl";
+import { MonacoRange } from "./MonacoRange";
+
 export class StringChangeRequest {
     
-    private timestamp: string;
-    private text: string;
-    private index: number; // May need one for column and one for row/line number instead
+    public timestamp: string;
+    public text: string;
+    public identity: string;
+    public range: MonacoRange
 
     //May need more fields for revision id and client id
     
-    constructor(timestamp: string, text: string, index: number) {
+    constructor(timestamp: string, text: string, identity: string, range: MonacoRange) {
         this.timestamp = timestamp;
         this.text = text;
-        this.index = index;
+        this.identity = identity;
+        this.range = range;
     }
 }

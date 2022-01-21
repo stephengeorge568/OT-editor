@@ -24,6 +24,7 @@
     "monaco-editor": "^0.31.1",
     "net": "^1.0.2",
     "ngx-monaco-editor": "^12.0.0",
+    "queue": "^6.0.2",
     "rxjs": "~6.6.0",
     "sockjs-client": "^1.5.2",
     "stompjs": "^2.3.3",
