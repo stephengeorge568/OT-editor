@@ -38,7 +38,6 @@ export class EditorService {
   public recieveFromWebSocket(request: any) {
       
       let obj = JSON.parse(request.body);
-      console.log(obj);
       if (obj.identity != this.identity) {
         this.stringChangeRequestSubject.next(new StringChangeRequest(obj.timestamp, obj.text, this.identity, obj.range));
       }  
@@ -64,6 +63,7 @@ export class EditorService {
   public connectWebSocket(): void {
     let socket = new SockJS(this.webSocketEndPoint);
         this.stompClient = Stomp.over(socket);
+        this.stompClient.debug = GlobalConstants.disableStompLogging;
         const _this = this;
         _this.stompClient.connect({}, function (frame: any) {
             _this.stompClient.subscribe(_this.incomingURI, function (event: any) {

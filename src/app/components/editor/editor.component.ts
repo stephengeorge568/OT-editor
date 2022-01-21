@@ -14,8 +14,8 @@ import { EditorService } from './service/editor.service';
 })
 export class EditorComponent implements OnInit {
 
-  editorOptions = {theme: 'vs-dark', language: 'java'};
-  model: NgxEditorModel = {value : 'class A {\n\tString q;\n\n\tpublic A() {\n\t\t\n\t}\n}'};
+  editorOptions = {theme: 'vs-dark', language: 'javascript'};
+  model: NgxEditorModel = {value : 'class A {\n\tString q;\n\n\tpublic A() {\n\t\t\n\t}\n}', language: 'java'};
 
   editor: any;
   subsc: any;
@@ -33,7 +33,6 @@ export class EditorComponent implements OnInit {
   onInit(editorInit: monaco.editor.IStandaloneCodeEditor) {
     this.editor = editorInit;
     this.subscriptions();
-    
   }
 
   ngOnDestroy(): void {
