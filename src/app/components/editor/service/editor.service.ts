@@ -24,7 +24,9 @@ export class EditorService {
   stompClient: any;
 
   subjectObservable: Observable<any>;
-  stringChangeRequestSubject: BehaviorSubject<StringChangeRequest> = new BehaviorSubject(new StringChangeRequest("", "", "", new MonacoRange(-1, -1, -1, -1)));
+
+  // TODO gotta be better/more proper way to do this. this outputs event on init when i dont want it to.
+  stringChangeRequestSubject: BehaviorSubject<StringChangeRequest> = new BehaviorSubject(new StringChangeRequest("", "", "", new MonacoRange(-1, -1, -1, -1), -1));
   
   constructor(private http: HttpClient) {
 
@@ -39,7 +41,7 @@ export class EditorService {
       
       let obj = JSON.parse(request.body);
       if (obj.identity != this.identity) {
-        this.stringChangeRequestSubject.next(new StringChangeRequest(obj.timestamp, obj.text, this.identity, obj.range));
+        this.stringChangeRequestSubject.next(new StringChangeRequest(obj.timestamp, obj.text, this.identity, obj.range, obj.revID));
       }  
   }
 
