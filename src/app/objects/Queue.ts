@@ -1,6 +1,6 @@
 import { StringChangeRequest } from "./StringChangeRequest";
 
-// Dirty implementation of Queue DS
+// Dirty implementation of Queue
 export class Queue {
     private arr: any[];
 

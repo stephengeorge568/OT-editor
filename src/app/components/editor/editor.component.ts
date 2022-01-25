@@ -6,6 +6,7 @@ import { NgxEditorModel } from 'ngx-monaco-editor';
 import { MonacoRange } from 'src/app/objects/MonacoRange';
 import { StringChangeRequest } from 'src/app/objects/StringChangeRequest';
 import { EditorService } from './service/editor.service';
+import { OperationalTransformationService } from './service/operational-transformation.service';
 
 @Component({
   selector: 'app-editor',
@@ -16,14 +17,15 @@ export class EditorComponent implements OnInit {
 
   editorOptions = {theme: 'vs-dark', language: 'javascript'};
   model: NgxEditorModel = {value : 'class A {\n\tString q;\n\n\tpublic A() {\n\t\t\n\t}\n}', language: 'java'};
-
   editor: any;
   subsc: any;
 
   isProgrammaticChange: boolean;
+  
 
-  constructor(private editorService: EditorService) { 
+  constructor(private editorService: EditorService, private otService: OperationalTransformationService) { 
     this.isProgrammaticChange = false;
+    
   }
 
   ngOnInit(): void {
@@ -54,6 +56,7 @@ export class EditorComponent implements OnInit {
   subscriptions(): void {
     // This subscription manages incoming changes from other clients
     this.editorService.stringChangeRequestSubject.subscribe(operation => {
+      console.log(operation.range);
       this.isProgrammaticChange = true;
       this.editor.getModel()?.applyEdits([{
         forceMoveMarkers: true,
@@ -76,7 +79,7 @@ export class EditorComponent implements OnInit {
       if (!this.isProgrammaticChange) {
         console.log("Manual change: " + event.changes[0].text);
         this.editorService.sendOperation(new StringChangeRequest(new Date().toISOString(), event.changes[0].text, this.editorService.identity, 
-                                         new MonacoRange(opRange.endColumn, opRange.startColumn, opRange.endLineNumber, opRange.startLineNumber)));
+                                         new MonacoRange(opRange.endColumn, opRange.startColumn, opRange.endLineNumber, opRange.startLineNumber), this.otService.revID));
       } else {
         console.log("Programmatic change: " + event.changes[0].text);
       } 
