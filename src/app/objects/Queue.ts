@@ -1,28 +1,28 @@
 import { StringChangeRequest } from "./StringChangeRequest";
 
 // Dirty implementation of Queue
-export class Queue {
-    private arr: any[];
+export class Queue<T> {
+    private arr: T[];
 
     constructor() {
         this.arr = [];
     }
 
-    public enqueue(e: any): void {
+    public enqueue(e: T): void {
         this.arr.unshift(e);
     }
 
-    public peek(): any {
+    public peek(): T | null {
         if (this.arr.length > 0) {
             return this.arr[0];
-        } else return {"timestamp":"","text":"","index":"","identity":""}; // this needs to change TODO
+        } return null; 
     }
 
-    public dequeue(): any {
+    public dequeue(): T | undefined {
         return this.arr.shift();
     }
 
-    public getQueue(): any[] {
+    public getQueue(): T[] {
         return this.arr;
     }
 

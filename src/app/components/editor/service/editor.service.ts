@@ -25,17 +25,20 @@ export class EditorService {
 
   subjectObservable: Observable<any>;
 
+  queue: Queue<StringChangeRequest>;
+  awaitingChangeResponse: boolean;
+
   // TODO gotta be better/more proper way to do this. this outputs event on init when i dont want it to.
   stringChangeRequestSubject: BehaviorSubject<StringChangeRequest> = new BehaviorSubject(new StringChangeRequest("", "", "", new MonacoRange(-1, -1, -1, -1), -1));
   
   constructor(private http: HttpClient) {
-
+    this.awaitingChangeResponse = false;
+    this.queue = new Queue();
     // This is just to work around identity needing to be defin assigned. Idk yet TODO
     this.identity = "";
     this.cacheIdentity();
     this.subjectObservable = this.stringChangeRequestSubject.asObservable();
   }
-
 
   public recieveFromWebSocket(request: any) {
       
@@ -54,12 +57,18 @@ export class EditorService {
     });
   }
 
-  public sendOperation(request: StringChangeRequest): void {
-    this.http.post("http://" + GlobalConstants.serverIP + ":8080/change", request).subscribe(response => {
-    },
+  public sendOperation(request: StringChangeRequest | undefined): void {
+    if (request != undefined) {
+      this.awaitingChangeResponse = true;
+      this.http.post("http://" + GlobalConstants.serverIP + ":8080/change", request).subscribe(response => {
+        this.awaitingChangeResponse = false;
+        this.sendNextChangeRequest();
+        // put request in history 
+      },
     err => {
       console.log("Send operation has failed: " + err);
     });
+    }
   }
   
   public connectWebSocket(): void {
@@ -87,6 +96,18 @@ export class EditorService {
         console.log("Attemping to reconnect to the server via web socket.");
         this.connectWebSocket();
     }, 5000);
+  }
+
+  public insertChangeIntoQueue(request: StringChangeRequest): void {
+    if (!this.awaitingChangeResponse) {
+      this.sendOperation(request);
+    } else this.queue.enqueue(request);
+  }
+
+  public sendNextChangeRequest(): void {
+    if (!this.queue.isEmpty()) {
+      this.sendOperation(this.queue.dequeue());
+    }
   }
 
 }
