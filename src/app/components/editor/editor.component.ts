@@ -16,16 +16,13 @@ import { OperationalTransformationService } from './service/operational-transfor
 export class EditorComponent implements OnInit {
 
   editorOptions = {theme: 'vs-dark', language: 'javascript'};
-  model: NgxEditorModel = {value : 'class A {\n\tString q;\n\n\tpublic A() {\n\t\t\n\t}\n}', language: 'java'};
+  model: NgxEditorModel = {value : '', language: 'java'};
   editor: any;
   subsc: any;
-
   isProgrammaticChange: boolean;
   
-
   constructor(private editorService: EditorService, private otService: OperationalTransformationService) { 
-    this.isProgrammaticChange = false;
-    
+    this.isProgrammaticChange = false; 
   }
 
   ngOnInit(): void {
@@ -77,12 +74,22 @@ export class EditorComponent implements OnInit {
     this.subsc = this.editor.getModel().onDidChangeContent((event: monaco.editor.IModelContentChangedEvent) => { 
       let opRange: monaco.IRange = event.changes[0].range;
       if (!this.isProgrammaticChange) {
-        console.log("Manual change: " + event.changes[0].text);
-        this.editorService.sendOperation(new StringChangeRequest(new Date().toISOString(), event.changes[0].text, this.editorService.identity, 
-                                         new MonacoRange(opRange.endColumn, opRange.startColumn, opRange.endLineNumber, opRange.startLineNumber), this.otService.revID));
-      } else {
-        console.log("Programmatic change: " + event.changes[0].text);
-      } 
+        this.editorService.insertChangeIntoQueue(
+          new StringChangeRequest(
+            new Date().toISOString(), 
+            event.changes[0].text, 
+            this.editorService.identity, 
+            new MonacoRange(
+              opRange.endColumn, 
+              opRange.startColumn, 
+              opRange.endLineNumber, 
+              opRange.startLineNumber), 
+              this.otService.revID));
+
+        if (!this.editorService.awaitingChangeResponse) {
+          this.editorService.sendNextChangeRequest();
+        }
+      }
     }); 
   }
 
