@@ -8,14 +8,14 @@ export class StringChangeRequest {
     public identity: string;
     public range: MonacoRange
     public revID: number;
+    public setID?: number;
 
-    //May need more fields for revision id and client id
-    
-    constructor(timestamp: string, text: string, identity: string, range: MonacoRange, revID: number) {
+    constructor(timestamp: string, text: string, identity: string, range: MonacoRange, revID: number, setID?: number) {
         this.timestamp = timestamp;
         this.text = text;
         this.identity = identity;
         this.range = range;
         this.revID = revID;
+        this.setID = setID;
     }
 }

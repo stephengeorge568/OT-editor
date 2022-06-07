@@ -17,6 +17,7 @@ export class EditorComponent implements OnInit {
 
   editorOptions = {theme: 'vs-dark', language: 'javascript'};
   model: NgxEditorModel = {value : '', language: 'java'};
+  
   editor: any;
   subsc: any;
   isProgrammaticChange: boolean;
@@ -47,14 +48,14 @@ export class EditorComponent implements OnInit {
   }
 
   button() {
- 
+    console.log("revID: " + this.otService.revID);
   }
 
   subscriptions(): void {
     // This subscription manages incoming changes from other clients
     this.editorService.stringChangeRequestSubject.subscribe(operation => {
-      console.log(operation.range);
       this.isProgrammaticChange = true;
+      // TODO change to other method
       this.editor.getModel()?.applyEdits([{
         forceMoveMarkers: true,
         range: {
@@ -65,14 +66,17 @@ export class EditorComponent implements OnInit {
         },
         text: operation.text
       }]);
-        this.isProgrammaticChange = false;
+    
+      this.isProgrammaticChange = false;
     }, err => {
       console.log(err);
     });
 
     // This subscription manages changes found on the local editor
     this.subsc = this.editor.getModel().onDidChangeContent((event: monaco.editor.IModelContentChangedEvent) => { 
+      
       let opRange: monaco.IRange = event.changes[0].range;
+      
       if (!this.isProgrammaticChange) {
         this.editorService.insertChangeIntoQueue(
           new StringChangeRequest(

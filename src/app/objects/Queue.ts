@@ -9,7 +9,7 @@ export class Queue<T> {
     }
 
     public enqueue(e: T): void {
-        this.arr.unshift(e);
+        this.arr.push(e);
     }
 
     public peek(): T | null {

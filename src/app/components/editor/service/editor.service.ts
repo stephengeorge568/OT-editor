@@ -11,6 +11,7 @@ import { GlobalConstants } from 'src/app/objects/GlobalConstants';
 import { Queue } from 'src/app/objects/Queue';
 import { StringResponse } from 'src/app/objects/StringResponse';
 import { MonacoRange } from 'src/app/objects/MonacoRange';
+import { OperationalTransformationService } from './operational-transformation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -29,9 +30,9 @@ export class EditorService {
   awaitingChangeResponse: boolean;
 
   // TODO gotta be better/more proper way to do this. this outputs event on init when i dont want it to.
-  stringChangeRequestSubject: BehaviorSubject<StringChangeRequest> = new BehaviorSubject(new StringChangeRequest("", "", "", new MonacoRange(-1, -1, -1, -1), -1));
+  stringChangeRequestSubject: BehaviorSubject<StringChangeRequest> = new BehaviorSubject(new StringChangeRequest("", "", "", new MonacoRange(-1, -1, -1, -1), 1));
   
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private otService: OperationalTransformationService) {
     this.awaitingChangeResponse = false;
     this.queue = new Queue();
     // This is just to work around identity needing to be defin assigned. Idk yet TODO
@@ -43,8 +44,10 @@ export class EditorService {
   public recieveFromWebSocket(request: any) {
       
       let obj = JSON.parse(request.body);
+      
       if (obj.identity != this.identity) {
-        this.stringChangeRequestSubject.next(new StringChangeRequest(obj.timestamp, obj.text, this.identity, obj.range, obj.revID));
+        this.stringChangeRequestSubject.next(new StringChangeRequest(obj.timestamp, obj.text, this.identity, obj.range, obj.revID, obj.setID));
+        this.otService.revID = obj.setID;
       }  
   }
 
@@ -60,7 +63,11 @@ export class EditorService {
   public sendOperation(request: StringChangeRequest | undefined): void {
     if (request != undefined) {
       this.awaitingChangeResponse = true;
-      this.http.post("http://" + GlobalConstants.serverIP + ":8080/change", request).subscribe(response => {
+      //console.log("Sent " + request.text);
+      console.log(request);
+      this.http.post<number>("http://" + GlobalConstants.serverIP + ":8080/change", request).subscribe(response => {
+        console.log("Arrived!");
+        this.otService.revID = response;
         this.awaitingChangeResponse = false;
         this.sendNextChangeRequest();
         // put request in history 
@@ -99,6 +106,7 @@ export class EditorService {
   }
 
   public insertChangeIntoQueue(request: StringChangeRequest): void {
+    console.log(this.queue);
     if (!this.awaitingChangeResponse) {
       this.sendOperation(request);
     } else this.queue.enqueue(request);
