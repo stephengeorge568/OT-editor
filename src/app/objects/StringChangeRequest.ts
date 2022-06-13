@@ -1,4 +1,5 @@
 import { start } from "repl";
+import { identity, range } from "rxjs";
 import { MonacoRange } from "./MonacoRange";
 
 export class StringChangeRequest {

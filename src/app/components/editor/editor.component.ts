@@ -56,15 +56,18 @@ export class EditorComponent implements OnInit {
     this.editorService.stringChangeRequestSubject.subscribe(operation => {
       this.isProgrammaticChange = true;
       // TODO change to other method
+
+      let transformed: StringChangeRequest[] = this.otService.transform(operation);
+      this.otService.insertRequestIntoHistory(transformed[0]);
       this.editor.getModel()?.applyEdits([{
         forceMoveMarkers: true,
         range: {
-            startLineNumber: operation.range.startLineNumber,
-            endLineNumber: operation.range.endLineNumber,
-            startColumn: operation.range.startColumn,
-            endColumn: operation.range.endColumn,
+            startLineNumber: transformed[0].range.startLineNumber,
+            endLineNumber: transformed[0].range.endLineNumber,
+            startColumn: transformed[0].range.startColumn,
+            endColumn: transformed[0].range.endColumn,
         },
-        text: operation.text
+        text: transformed[0].text
       }]);
     
       this.isProgrammaticChange = false;
@@ -74,22 +77,21 @@ export class EditorComponent implements OnInit {
 
     // This subscription manages changes found on the local editor
     this.subsc = this.editor.getModel().onDidChangeContent((event: monaco.editor.IModelContentChangedEvent) => { 
-      
       let opRange: monaco.IRange = event.changes[0].range;
-      
-      if (!this.isProgrammaticChange) {
-        this.editorService.insertChangeIntoQueue(
-          new StringChangeRequest(
-            new Date().toISOString(), 
-            event.changes[0].text, 
-            this.editorService.identity, 
-            new MonacoRange(
-              opRange.endColumn, 
-              opRange.startColumn, 
-              opRange.endLineNumber, 
-              opRange.startLineNumber), 
-              this.otService.revID));
+      let request: StringChangeRequest = new StringChangeRequest(
+        new Date().toISOString(), 
+        event.changes[0].text, 
+        this.editorService.identity, 
+        new MonacoRange(
+          opRange.endColumn, 
+          opRange.startColumn, 
+          opRange.endLineNumber, 
+          opRange.startLineNumber), 
+        this.otService.revID);
 
+      this.otService.insertRequestIntoHistory(request);
+      if (!this.isProgrammaticChange) {
+        this.editorService.insertChangeIntoQueue(request);
         if (!this.editorService.awaitingChangeResponse) {
           this.editorService.sendNextChangeRequest();
         }

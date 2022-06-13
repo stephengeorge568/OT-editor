@@ -14,13 +14,14 @@ export class OperationalTransformationService {
   constructor(private monacoService: MonacoRangeService) {
     this.revID = 1;
     this.history = new Map();
-    this.history.get(0);
   }
 
-  private insertRequestIntoHistory(req: StringChangeRequest): void {
+  public insertRequestIntoHistory(req: StringChangeRequest): void {
     if (this.history.get(req.revID) == undefined) {
       this.history.set(req.revID, [req]);
     } else this.history.get(req.revID)?.push(req);
+
+    console.log(this.history);
   }
 
   private getRelevantHistory(revID: number, history: Map<number, StringChangeRequest[]>): StringChangeRequest[] {
