@@ -56,7 +56,7 @@ export class EditorComponent implements OnInit {
     this.editorService.stringChangeRequestSubject.subscribe(operation => {
       this.isProgrammaticChange = true;
       // TODO change to other method
-
+      console.log(operation);
       let transformed: StringChangeRequest[] = this.otService.transform(operation);
       this.otService.insertRequestIntoHistory(transformed[0]);
       this.editor.getModel()?.applyEdits([{
@@ -77,6 +77,7 @@ export class EditorComponent implements OnInit {
 
     // This subscription manages changes found on the local editor
     this.subsc = this.editor.getModel().onDidChangeContent((event: monaco.editor.IModelContentChangedEvent) => { 
+      console.log("identity: " + this.editorService.identity);
       let opRange: monaco.IRange = event.changes[0].range;
       let request: StringChangeRequest = new StringChangeRequest(
         new Date().toISOString(), 

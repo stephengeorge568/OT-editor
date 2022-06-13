@@ -9,7 +9,6 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 import { GlobalConstants } from 'src/app/objects/GlobalConstants';
 import { Queue } from 'src/app/objects/Queue';
-import { StringResponse } from 'src/app/objects/StringResponse';
 import { MonacoRange } from 'src/app/objects/MonacoRange';
 import { OperationalTransformationService } from './operational-transformation.service';
 
@@ -52,8 +51,8 @@ export class EditorService {
   }
 
   public cacheIdentity(): void {
-    this.http.get<StringResponse>("http://" + GlobalConstants.serverIP + ":8080/identity").subscribe(response => {
-      this.identity = response.string;
+    this.http.get("http://" + GlobalConstants.serverIP + ":8080/identity", {responseType: 'text'}).subscribe(response => {
+      this.identity = response;
     },
     err => {
       console.log("Get identity has failed: " + err);
@@ -63,10 +62,7 @@ export class EditorService {
   public sendOperation(request: StringChangeRequest | undefined): void {
     if (request != undefined) {
       this.awaitingChangeResponse = true;
-      //console.log("Sent " + request.text);
-      console.log(request);
       this.http.post<number>("http://" + GlobalConstants.serverIP + ":8080/change", request).subscribe(response => {
-        console.log("Arrived!");
         this.otService.revID = response;
         this.awaitingChangeResponse = false;
         this.sendNextChangeRequest();
@@ -106,7 +102,6 @@ export class EditorService {
   }
 
   public insertChangeIntoQueue(request: StringChangeRequest): void {
-    console.log(this.queue);
     if (!this.awaitingChangeResponse) {
       this.sendOperation(request);
     } else this.queue.enqueue(request);

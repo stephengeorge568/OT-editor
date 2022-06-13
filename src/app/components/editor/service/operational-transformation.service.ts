@@ -20,8 +20,6 @@ export class OperationalTransformationService {
     if (this.history.get(req.revID) == undefined) {
       this.history.set(req.revID, [req]);
     } else this.history.get(req.revID)?.push(req);
-
-    console.log(this.history);
   }
 
   private getRelevantHistory(revID: number, history: Map<number, StringChangeRequest[]>): StringChangeRequest[] {
