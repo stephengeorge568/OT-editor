@@ -1,0 +1,12 @@
+.editor {
+    min-width: 100%;
+    width: 100%;
+	min-height: 100%;
+}
+
+.container {
+	margin-top: 100px;
+	padding: 50px;
+    width: 50vw; /**/
+    height: 80vh; /**/
+}

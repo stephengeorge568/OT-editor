@@ -5,6 +5,11 @@ import { AppComponent } from './app.component';
 import { FormsModule } from '@angular/forms';
 import { EditorComponent } from './components/editor/editor.component';
 import { HttpClientModule } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import { MonacoComponent } from './components/monaco/monaco.component'; 
+import { RouterModule, Routes } from '@angular/router'
+import { AppRoutingModule } from './app-routing.module';
 
 const monacoConfig: NgxMonacoEditorConfig = {
   baseUrl: 'OT-editor/assets', // configure base path cotaining monaco-editor directory after build default: './assets'
@@ -15,14 +20,18 @@ const monacoConfig: NgxMonacoEditorConfig = {
 @NgModule({
   declarations: [
     AppComponent,
-    EditorComponent
+    EditorComponent,
+    MonacoComponent
   ],
   imports: [
     HttpClientModule,
+    RouterModule,
+    AppRoutingModule,
     BrowserModule,
     FormsModule,
-    MonacoEditorModule.forRoot(monacoConfig)
-    
+    MonacoEditorModule.forRoot(monacoConfig),
+    BrowserAnimationsModule,
+    MatToolbarModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,116 +1,110 @@
 import { Injectable } from '@angular/core';
-import * as monaco from 'monaco-editor';
-import { BehaviorSubject } from 'rxjs';
-import * as SockJS from 'sockjs-client';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { StringChangeRequest } from 'src/app/objects/StringChangeRequest';
-import * as Stomp from 'stompjs';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
 import { GlobalConstants } from 'src/app/objects/GlobalConstants';
 import { Queue } from 'src/app/objects/Queue';
 import { MonacoRange } from 'src/app/objects/MonacoRange';
-import { OperationalTransformationService } from './operational-transformation.service';
+import { OperationalTransformationService } from './ot/operational-transformation.service';
+import { Component, OnInit } from '@angular/core';
+import { of, pipe } from 'rxjs';
+import { map, filter, tap } from 'rxjs/operators'
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class EditorService {
 
-  identity: string;
+    // identity of the client - currently IP
+    clientIdentity: string;
 
-  webSocketEndPoint: string = 'http://' + GlobalConstants.serverIP + ':8080/ws';
-  incomingURI: string = "/broker/string-change-request";
-  stompClient: any;
+    // pending change queue to send to server
+    pendingChangeQueue: Queue<StringChangeRequest>;
 
-  subjectObservable: Observable<any>;
+    // TODO gotta be better/more proper way to do this. this outputs event on init when i dont want it to.
+    stringChangeRequestSubject: BehaviorSubject<StringChangeRequest> = new BehaviorSubject(new StringChangeRequest("", "", "", new MonacoRange(-1, -1, -1, -1), 1));
 
-  queue: Queue<StringChangeRequest>;
-  awaitingChangeResponse: boolean;
+    /* ----------------- FLAGS ----------------- */
 
-  // TODO gotta be better/more proper way to do this. this outputs event on init when i dont want it to.
-  stringChangeRequestSubject: BehaviorSubject<StringChangeRequest> = new BehaviorSubject(new StringChangeRequest("", "", "", new MonacoRange(-1, -1, -1, -1), 1));
-  
-  constructor(private http: HttpClient, private otService: OperationalTransformationService) {
-    this.awaitingChangeResponse = false;
-    this.queue = new Queue();
-    // This is just to work around identity needing to be defin assigned. Idk yet TODO
-    this.identity = "";
-    this.cacheIdentity();
-    this.subjectObservable = this.stringChangeRequestSubject.asObservable();
-  }
+    // flag to halt sending of change requests until response arrives from earlier response
+    isAwaitingChangeResponse: boolean;
 
-  public recieveFromWebSocket(request: any) {
-      
-      let obj = JSON.parse(request.body);
-      
-      if (obj.identity != this.identity) {
-        this.stringChangeRequestSubject.next(new StringChangeRequest(obj.timestamp, obj.text, this.identity, obj.range, obj.revID, obj.setID));
-        this.otService.revID = obj.setID;
-      }  
-  }
+    // flag to halt displaying editor until server responds with identity id
+    isAwaitingIdentityResponse: boolean;
 
-  public cacheIdentity(): void {
-    this.http.get("http://" + GlobalConstants.serverIP + ":8080/identity", {responseType: 'text'}).subscribe(response => {
-      this.identity = response;
-    },
-    err => {
-      console.log("Get identity has failed: " + err);
-    });
-  }
+    // flag to halt displaying editor until server responds with model
+    isAwaitingModelResponse: boolean;
 
-  public sendOperation(request: StringChangeRequest | undefined): void {
-    if (request != undefined) {
-      this.awaitingChangeResponse = true;
-      this.http.post<number>("http://" + GlobalConstants.serverIP + ":8080/change", request).subscribe(response => {
-        this.otService.revID = response;
-        this.awaitingChangeResponse = false;
-        this.sendNextChangeRequest();
-        // put request in history 
-      },
-    err => {
-      console.log("Send operation has failed: " + err);
-    });
+    // flag to halt displaying editor until server responds with revId
+    isAwaitingRevIdResponse: boolean;
+
+    constructor(private http: HttpClient, private otService: OperationalTransformationService) {
+        this.isAwaitingChangeResponse = false;
+        this.isAwaitingIdentityResponse = true;
+        this.isAwaitingModelResponse = true;
+        this.isAwaitingRevIdResponse = true;
+
+        this.pendingChangeQueue = new Queue();
+        this.clientIdentity = "";
+
+        this.cacheIdentity();
+        this.cacheRevId();
     }
-  }
-  
-  public connectWebSocket(): void {
-    let socket = new SockJS(this.webSocketEndPoint);
-        this.stompClient = Stomp.over(socket);
-        this.stompClient.debug = GlobalConstants.disableStompLogging;
-        const _this = this;
-        _this.stompClient.connect({}, function (frame: any) {
-            _this.stompClient.subscribe(_this.incomingURI, function (event: any) {
-                _this.recieveFromWebSocket(event);
+
+    public cacheIdentity(): void {
+        this.http.get("http://" + GlobalConstants.serverIP + ":8080/identity", {responseType: 'text'}).subscribe(response => {
+            this.clientIdentity = response;
+            this.isAwaitingIdentityResponse = false;
+        },
+        err => {
+            console.log("Get identity has failed: " + err);
+        });
+    }
+
+    public cacheModel(): Observable<string> {
+        return this.http.get("http://" + GlobalConstants.serverIP + ":8080/model", {responseType: 'text'}).pipe(tap(response => {
+            this.isAwaitingModelResponse = false;
+        },
+        err => {
+            console.log("Get model has failed: " + err);
+        }));
+    }
+
+    public cacheRevId(): void {
+        this.http.get<number>("http://" + GlobalConstants.serverIP + ":8080/revId").subscribe(response => {
+            this.otService.revID = response
+            this.isAwaitingRevIdResponse = false;
+        },
+        err => {
+            console.log("Get model has failed: " + err);
+        });
+    }
+
+    public sendOperation(request: StringChangeRequest | undefined): void {
+        if (request != undefined) {
+            this.isAwaitingChangeResponse = true;
+            console.log(request);
+            this.http.post<number>("http://" + GlobalConstants.serverIP + ":8080/change", request).subscribe(response => {
+                this.otService.revID = response;
+                this.isAwaitingChangeResponse = false;
+                this.sendNextChangeRequest();
+            },
+            err => {
+                console.log("Send operation has failed: " + err);
             });
-        }, this.errorFromWebSocket);
-  }
-
-  public disconnectWebSocket() {
-    if (this.stompClient !== null) {
-        this.stompClient.disconnect();
+        }
     }
-    console.log("Web socket connection has been terminated.");
-  }
 
-  public errorFromWebSocket(error: any) {
-    console.log("APISocket error: " + error);
-    setTimeout(() => {
-        console.log("Attemping to reconnect to the server via web socket.");
-        this.connectWebSocket();
-    }, 5000);
-  }
+    public insertChangeIntoQueue(request: StringChangeRequest): void {
+        if (!this.isAwaitingChangeResponse) {
+            this.sendOperation(request);
+        } else this.pendingChangeQueue.enqueue(request);
+        }
 
-  public insertChangeIntoQueue(request: StringChangeRequest): void {
-    if (!this.awaitingChangeResponse) {
-      this.sendOperation(request);
-    } else this.queue.enqueue(request);
-  }
-
-  public sendNextChangeRequest(): void {
-    if (!this.queue.isEmpty()) {
-      this.sendOperation(this.queue.dequeue());
+        public sendNextChangeRequest(): void {
+        if (!this.pendingChangeQueue.isEmpty()) {
+            this.sendOperation(this.pendingChangeQueue.dequeue());
+        }
     }
-  }
 
 }
