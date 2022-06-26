@@ -13,11 +13,6 @@
 	margin-right: auto;
 }
 
-.wrapper {
-	position: relative;
-}
-
-.wrapper div, .wrapper video {
-    position: absolute;
-    top: 0;
+.icon-buttons {
+	align-content: right;
 }

@@ -10,6 +10,10 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import { MonacoComponent } from './components/monaco/monaco.component'; 
 import { RouterModule, Routes } from '@angular/router'
 import { AppRoutingModule } from './app-routing.module';
+import {MatButtonModule} from '@angular/material/button'; 
+import { MatIconModule } from "@angular/material/icon";
+import { MatIconRegistry } from "@angular/material/icon";
+import { DomSanitizer } from "@angular/platform-browser";
 
 const monacoConfig: NgxMonacoEditorConfig = {
   baseUrl: 'OT-editor/assets', // configure base path cotaining monaco-editor directory after build default: './assets'
@@ -24,6 +28,8 @@ const monacoConfig: NgxMonacoEditorConfig = {
     MonacoComponent
   ],
   imports: [
+    MatIconModule,
+    MatButtonModule,
     HttpClientModule,
     RouterModule,
     AppRoutingModule,
