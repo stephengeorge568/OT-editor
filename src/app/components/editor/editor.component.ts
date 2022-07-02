@@ -77,14 +77,14 @@ export class EditorComponent implements OnInit {
             let transformed: StringChangeRequest[] = this.otService.transform(operation);
             this.otService.insertRequestIntoHistory(transformed[0]);
             this.editor.getModel()?.applyEdits([{
-            forceMoveMarkers: true,
-            range: {
-                startLineNumber: transformed[0].range.startLineNumber,
-                endLineNumber: transformed[0].range.endLineNumber,
-                startColumn: transformed[0].range.startColumn,
-                endColumn: transformed[0].range.endColumn,
-            },
-            text: transformed[0].text
+                forceMoveMarkers: true,
+                range: {
+                    startLineNumber: transformed[0].range.startLineNumber,
+                    endLineNumber: transformed[0].range.endLineNumber,
+                    startColumn: transformed[0].range.startColumn,
+                    endColumn: transformed[0].range.endColumn,
+                },
+                text: transformed[0].text
             }]);
         
             this.isProgrammaticChange = false;
@@ -94,7 +94,6 @@ export class EditorComponent implements OnInit {
 
         // This subscription manages changes found on the local editor
         this.localEditorChangeSubscription = this.editor.getModel().onDidChangeContent((event: monaco.editor.IModelContentChangedEvent) => { 
-            console.log(this.model.value);
             let opRange: monaco.IRange = event.changes[0].range;
             let request: StringChangeRequest = new StringChangeRequest(
                 new Date().toISOString(), 

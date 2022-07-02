@@ -39,7 +39,7 @@ export class OperationalTransformationService {
         for (historicalRequest of this.getRelevantHistory(request.revID, this.history)) {
             // two request back to back from same client. the second one should not transform based on the first.
             // it already accounted for that
-            if (!(request.identity == historicalRequest.identity) && request.revID == historicalRequest.revID) {
+            if (!(request.identity == historicalRequest.identity)) {
                 let pair: StringChangeRequest[] = this.monacoService.resolveConflictingRanges(historicalRequest, transformedRequests[0]);
                 let temp: StringChangeRequest = this.transformOperation(historicalRequest, pair[0]);
                 transformedRequests[0] = temp;

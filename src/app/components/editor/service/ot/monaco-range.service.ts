@@ -70,6 +70,11 @@ export class MonacoRangeService {
     }
 
     public resolveConflictingRanges(prev: StringChangeRequest, next: StringChangeRequest): StringChangeRequest[] {
+
+        if (this.isRangeSimpleInsert(prev.range)  || this.isRangeSimpleInsert(next.range)) {
+            return new Array<StringChangeRequest>(next);
+        }
+
         if (this.isSCWithinRange(prev.range, next.range) &&
                     this.isECWithinRange(prev.range, next.range)) {
             next.range.startLineNumber = prev.range.endLineNumber;
@@ -111,6 +116,11 @@ export class MonacoRangeService {
             return new Array<StringChangeRequest>(next, otherNext);
         }
         return new Array<StringChangeRequest>(next);
+    }
+
+    private isRangeSimpleInsert(range: MonacoRange): boolean {
+        return range.startLineNumber - range.endLineNumber == 0
+                && range.startColumn - range.endColumn == 0;
     }
 
 }

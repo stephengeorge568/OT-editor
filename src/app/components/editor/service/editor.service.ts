@@ -83,7 +83,7 @@ export class EditorService {
     public sendOperation(request: StringChangeRequest | undefined): void {
         if (request != undefined) {
             this.isAwaitingChangeResponse = true;
-            console.log(request);
+            
             this.http.post<number>("http://" + GlobalConstants.serverIP + ":8080/change", request).subscribe(response => {
                 this.otService.revID = response;
                 this.isAwaitingChangeResponse = false;
