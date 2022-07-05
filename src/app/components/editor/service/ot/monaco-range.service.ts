@@ -118,9 +118,8 @@ export class MonacoRangeService {
         return new Array<StringChangeRequest>(next);
     }
 
-    private isRangeSimpleInsert(range: MonacoRange): boolean {
+    public isRangeSimpleInsert(range: MonacoRange): boolean {
         return range.startLineNumber - range.endLineNumber == 0
                 && range.startColumn - range.endColumn == 0;
     }
-
 }

@@ -98,16 +98,35 @@ export class OperationalTransformationService {
                                 - prev.range.startColumn;
                     if (next.range.startLineNumber == prev.range.endLineNumber) {
                         newSC = newSC - numberOfCharsDeletedOnPrevLine + prev.text.length;
+                    } else {
+                        newSC = prev.range.startColumn + prev.text.length;
                     }
+
+
                     if (next.range.endLineNumber == prev.range.endLineNumber) {
                         newEC = newEC - numberOfCharsDeletedOnPrevLine + prev.text.length;
+                    } else {
+                        if (this.monacoService.isRangeSimpleInsert(next.range)) {
+                            newEC = newSC;
+                        } else {
+                            console.log("TBD");
+                        }
                     }
 
                 }
             }
 
-            newSL += netNewLineNumberChange;
-            newEL += netNewLineNumberChange;
+            if (this.monacoService.isSCWithinRange(prev.range, next.range)) {
+                newSL = prev.range.startLineNumber + numberOfNewLinesInPrev;
+            } else {
+                newSL += netNewLineNumberChange;
+            }
+
+            if (this.monacoService.isECWithinRange(prev.range, next.range)) {
+                newSL = prev.range.startLineNumber + numberOfNewLinesInPrev;
+            } else {
+                newEL += netNewLineNumberChange;
+            }
         }
 
         next.range = new MonacoRange(newSC, newEC, newSL, newEL);
