@@ -16,6 +16,7 @@ import { isDevMode } from '@angular/core';
 })
 export class EditorService {
 
+    // Backend server address
     serverIP: string;
 
     // identity of the client - currently IP
