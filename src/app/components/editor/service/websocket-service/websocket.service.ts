@@ -5,14 +5,15 @@ import { GlobalConstants } from 'src/app/objects/GlobalConstants';
 import { StringChangeRequest } from 'src/app/objects/StringChangeRequest';
 import { EditorService } from '../editor.service';
 import { OperationalTransformationService } from '../ot/operational-transformation.service';
+import { isDevMode } from '@angular/core';
 
 @Injectable({
     providedIn: 'root'
 })
 export class WebsocketService {
 
-    // websocket URL
-    webSocketEndPoint: string = 'http://' + GlobalConstants.serverIP + ':8080/ws';
+    // Backend server address
+    serverIP: string;
 
     // URI to recieve from websocket
     incomingURI: string = "/broker/string-change-request";
@@ -20,7 +21,11 @@ export class WebsocketService {
     // websocket client
     stompClient: any;
 
-    constructor(private editorService: EditorService, private otService: OperationalTransformationService) {}
+    constructor(private editorService: EditorService, private otService: OperationalTransformationService) {
+        if (isDevMode()) {
+            this.serverIP = GlobalConstants.devServerAddress;
+        } else this.serverIP = GlobalConstants.publicServerAddress;
+    }
 
     public recieveFromWebSocket(request: any) {      
         let obj = JSON.parse(request.body);
@@ -32,7 +37,7 @@ export class WebsocketService {
     }
 
     public connectWebSocket(): void {
-        let socket = new SockJS(this.webSocketEndPoint);
+        let socket = new SockJS('http://' + this.serverIP + ':8080/ws');
         this.stompClient = Stomp.over(socket);
         this.stompClient.debug = GlobalConstants.disableStompLogging;
         const _this = this;

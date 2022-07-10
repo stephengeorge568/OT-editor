@@ -8,12 +8,15 @@ import { MonacoRange } from 'src/app/objects/MonacoRange';
 import { OperationalTransformationService } from './ot/operational-transformation.service';
 import { Component, OnInit } from '@angular/core';
 import { of, pipe } from 'rxjs';
-import { map, filter, tap } from 'rxjs/operators'
+import { map, filter, tap } from 'rxjs/operators';
+import { isDevMode } from '@angular/core';
 
 @Injectable({
     providedIn: 'root'
 })
 export class EditorService {
+
+    serverIP: string;
 
     // identity of the client - currently IP
     clientIdentity: string;
@@ -39,6 +42,13 @@ export class EditorService {
     isAwaitingRevIdResponse: boolean;
 
     constructor(private http: HttpClient, private otService: OperationalTransformationService) {
+
+        if (isDevMode()) {
+            this.serverIP = GlobalConstants.devServerAddress;
+        } else this.serverIP = GlobalConstants.publicServerAddress;
+
+        console.log(this.serverIP);
+
         this.isAwaitingChangeResponse = false;
         this.isAwaitingIdentityResponse = true;
         this.isAwaitingModelResponse = true;
@@ -52,7 +62,7 @@ export class EditorService {
     }
 
     public cacheIdentity(): void {
-        this.http.get("http://" + GlobalConstants.serverIP + ":8080/identity", {responseType: 'text'}).subscribe(response => {
+        this.http.get("http://" + this.serverIP + ":8080/identity", {responseType: 'text'}).subscribe(response => {
             this.clientIdentity = response;
             this.isAwaitingIdentityResponse = false;
         },
@@ -62,7 +72,7 @@ export class EditorService {
     }
 
     public cacheModel(): Observable<string> {
-        return this.http.get("http://" + GlobalConstants.serverIP + ":8080/model", {responseType: 'text'}).pipe(tap(response => {
+        return this.http.get("http://" + this.serverIP + ":8080/model", {responseType: 'text'}).pipe(tap(response => {
             this.isAwaitingModelResponse = false;
         },
         err => {
@@ -71,7 +81,7 @@ export class EditorService {
     }
 
     public cacheRevId(): void {
-        this.http.get<number>("http://" + GlobalConstants.serverIP + ":8080/revId").subscribe(response => {
+        this.http.get<number>("http://" + this.serverIP + ":8080/revId").subscribe(response => {
             this.otService.revID = response
             this.isAwaitingRevIdResponse = false;
         },
@@ -84,7 +94,7 @@ export class EditorService {
         if (request != undefined) {
             this.isAwaitingChangeResponse = true;
             
-            this.http.post<number>("http://" + GlobalConstants.serverIP + ":8080/change", request).subscribe(response => {
+            this.http.post<number>("http://" + this.serverIP + ":8080/change", request).subscribe(response => {
                 this.otService.revID = response;
                 this.isAwaitingChangeResponse = false;
                 this.sendNextChangeRequest();
