@@ -48,7 +48,7 @@ export class EditorService {
             this.serverIP = GlobalConstants.devServerAddress;
         } else this.serverIP = GlobalConstants.publicServerAddress;
 
-        console.log(this.serverIP);
+        console.log("BK: " + this.serverIP);
 
         this.isAwaitingChangeResponse = false;
         this.isAwaitingIdentityResponse = true;
