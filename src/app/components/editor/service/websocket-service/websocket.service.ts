@@ -37,7 +37,7 @@ export class WebsocketService {
     }
 
     public connectWebSocket(): void {
-        let socket = new SockJS('http://' + this.serverIP + ':8080/ws');
+        let socket = new SockJS(this.serverIP + '/ws');
         this.stompClient = Stomp.over(socket);
         this.stompClient.debug = GlobalConstants.disableStompLogging;
         const _this = this;

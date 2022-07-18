@@ -63,7 +63,7 @@ export class EditorService {
     }
 
     public cacheIdentity(): void {
-        this.http.get("http://" + this.serverIP + ":8080/identity", {responseType: 'text'}).subscribe(response => {
+        this.http.get(this.serverIP + "/identity", {responseType: 'text'}).subscribe(response => {
             this.clientIdentity = response;
             this.isAwaitingIdentityResponse = false;
         },
@@ -73,7 +73,7 @@ export class EditorService {
     }
 
     public cacheModel(): Observable<string> {
-        return this.http.get("http://" + this.serverIP + ":8080/model", {responseType: 'text'}).pipe(tap(response => {
+        return this.http.get(this.serverIP + "/model", {responseType: 'text'}).pipe(tap(response => {
             this.isAwaitingModelResponse = false;
         },
         err => {
@@ -82,7 +82,7 @@ export class EditorService {
     }
 
     public cacheRevId(): void {
-        this.http.get<number>("http://" + this.serverIP + ":8080/revId").subscribe(response => {
+        this.http.get<number>(this.serverIP + "/revId").subscribe(response => {
             this.otService.revID = response
             this.isAwaitingRevIdResponse = false;
         },
@@ -95,7 +95,7 @@ export class EditorService {
         if (request != undefined) {
             this.isAwaitingChangeResponse = true;
             
-            this.http.post<number>("http://" + this.serverIP + ":8080/change", request).subscribe(response => {
+            this.http.post<number>(this.serverIP + "/change", request).subscribe(response => {
                 this.otService.revID = response;
                 this.isAwaitingChangeResponse = false;
                 this.sendNextChangeRequest();

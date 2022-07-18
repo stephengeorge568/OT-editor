@@ -1,5 +1,7 @@
 export class GlobalConstants {
-    public static devServerAddress: string = "192.168.0.3";
-    public static publicServerAddress: string = "stepheng.dev";
+    // My workstation's local ip
+    public static devServerAddress: string = "https://192.168.0.3:8443";
+    // prod ip
+    public static publicServerAddress: string = "https://stepheng.dev:8443";
     public static disableStompLogging = () => {};
 }
