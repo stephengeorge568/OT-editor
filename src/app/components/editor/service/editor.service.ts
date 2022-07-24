@@ -20,13 +20,13 @@ export class EditorService {
     serverIP: string;
 
     // identity of the client - currently IP
-    clientIdentity: string;
+    clientIdentity: number;
 
     // pending change queue to send to server
     pendingChangeQueue: Queue<StringChangeRequest>;
 
     // TODO gotta be better/more proper way to do this. this outputs event on init when i dont want it to.
-    stringChangeRequestSubject: BehaviorSubject<StringChangeRequest> = new BehaviorSubject(new StringChangeRequest("", "", "", new MonacoRange(-1, -1, -1, -1), 1));
+    stringChangeRequestSubject: BehaviorSubject<StringChangeRequest> = new BehaviorSubject(new StringChangeRequest("", "", -1, new MonacoRange(-1, -1, -1, -1), 1));
 
     /* ----------------- FLAGS ----------------- */
 
@@ -48,22 +48,20 @@ export class EditorService {
             this.serverIP = GlobalConstants.devServerAddress;
         } else this.serverIP = GlobalConstants.publicServerAddress;
 
-        console.log("BK: " + this.serverIP);
-
         this.isAwaitingChangeResponse = false;
         this.isAwaitingIdentityResponse = true;
         this.isAwaitingModelResponse = true;
         this.isAwaitingRevIdResponse = true;
 
         this.pendingChangeQueue = new Queue();
-        this.clientIdentity = "";
+        this.clientIdentity = -1;
 
         this.cacheIdentity();
         this.cacheRevId();
     }
 
     public cacheIdentity(): void {
-        this.http.get(this.serverIP + "/identity", {responseType: 'text'}).subscribe(response => {
+        this.http.get<number>(this.serverIP + "/identity").subscribe(response => {
             this.clientIdentity = response;
             this.isAwaitingIdentityResponse = false;
         },
