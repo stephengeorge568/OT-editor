@@ -1,0 +1,48 @@
+.toolbar {
+    
+	background: #000000;
+	box-shadow: 0px 4px 4px rgba(0,0,0,0.4);
+	color: #c9c9c9;
+
+	/* position: fixed;
+    position: -webkit-sticky; /* For macOS/iOS Safari 
+	top: 0px;  Sets the sticky toolbar to be on top 
+    z-index: 100; Ensure that your app's content doesn't overlap the toolbar */
+	display: flex;
+}
+
+.bar-text {
+	margin-right: auto;
+}
+
+.author-tag {
+	font-size: 14px;
+	padding-left: 10px;
+	padding-bottom: 200px;
+}
+
+.yacht-icon {
+	transform: scale(1.7);
+	padding-top: 5px;
+	padding-right: 23px;
+	padding-left: 18px;
+}
+
+.github-icon {
+	float: right;
+}
+
+b {
+	font-size: 26px;
+}
+
+.container {
+	width: 100%;
+  display: flex;
+  justify-content: space-around;
+}
+
+.child {
+
+}
+
